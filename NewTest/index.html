@@ -3,202 +3,170 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tic Tac Toe</title>
+  <title>Free Fitness Tools | 29 Again Custom Fitness</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --teal: #00859a; --red: #FF4140; --teal-dark: #006f80; --red-dark: #d93534; --light: #f4f8f9; --text: #2b2b2b; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
 
-    body {
+    header {
+      background: var(--teal);
+      color: white;
+      text-align: center;
+      padding: 2.5rem 1rem 2rem;
+    }
+    header h1 { font-size: 2rem; font-weight: 800; letter-spacing: 0.5px; }
+    header p { font-size: 1rem; margin-top: 0.5rem; opacity: 0.9; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+
+    main { flex: 1; max-width: 780px; width: 100%; margin: 2rem auto; padding: 0 1rem; }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .intro h2 { font-size: 1.3rem; color: var(--teal); margin-bottom: 0.5rem; }
+    .intro p { font-size: 0.95rem; color: #666; line-height: 1.6; }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .tool-card {
+      background: white;
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: #1a1a2e;
-      font-family: 'Segoe UI', sans-serif;
-      color: #eee;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .tool-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+
+    .tool-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .tool-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text); }
+    .tool-card p { font-size: 0.88rem; color: #666; line-height: 1.5; flex: 1; }
+
+    .tool-tag {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.3rem 0.9rem;
+      background: #eaf6f8;
+      color: var(--teal);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      align-self: flex-start;
     }
 
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      letter-spacing: 2px;
-      color: #e94560;
-    }
-
-    #status {
-      font-size: 1.2rem;
-      margin-bottom: 1.5rem;
-      min-height: 1.5em;
-      color: #a8dadc;
-    }
-
-    #board {
-      display: grid;
-      grid-template-columns: repeat(3, 110px);
-      grid-template-rows: repeat(3, 110px);
-      gap: 8px;
-    }
-
-    .cell {
-      background: #16213e;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      user-select: none;
-    }
-
-    .cell:hover:not(.taken) {
-      background: #0f3460;
-      transform: scale(1.05);
-    }
-
-    .cell.x { color: #e94560; }
-    .cell.o { color: #a8dadc; }
-
-    .cell.win {
-      background: #0f3460;
-      animation: pulse 0.5s ease;
-    }
-
-    @keyframes pulse {
-      0%   { transform: scale(1); }
-      50%  { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-
-    #restart {
-      margin-top: 1.5rem;
-      padding: 0.6rem 2rem;
-      font-size: 1rem;
-      background: #e94560;
+    .tool-card:hover .tool-tag {
+      background: var(--teal);
       color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
     }
 
-    #restart:hover { background: #c73652; }
-
-    #scores {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 1.5rem;
-      font-size: 1rem;
-    }
-
-    .score-box {
+    .cta-strip {
+      background: var(--teal);
+      color: white;
+      border-radius: 14px;
+      padding: 2rem;
       text-align: center;
+      margin-bottom: 1rem;
     }
-
-    .score-box span {
-      display: block;
-      font-size: 1.8rem;
-      font-weight: bold;
+    .cta-strip h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .cta-strip p { font-size: 0.92rem; opacity: 0.9; margin-bottom: 1.2rem; line-height: 1.5; }
+    .cta-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+    .cta-buttons a {
+      display: inline-block;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
     }
+    .cta-buttons a:hover { opacity: 0.85; }
+    .btn-white { background: white; color: var(--teal); }
+    .btn-red { background: var(--red); color: white; }
 
-    .score-box.x-score span { color: #e94560; }
-    .score-box.o-score span { color: #a8dadc; }
-    .score-box.draw-score span { color: #888; }
+    footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #888; }
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.5rem; }
+      .tools-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <h1>Tic Tac Toe</h1>
 
-  <div id="scores">
-    <div class="score-box x-score">X<span id="score-x">0</span></div>
-    <div class="score-box draw-score">Draws<span id="score-d">0</span></div>
-    <div class="score-box o-score">O<span id="score-o">0</span></div>
+<header>
+  <h1>29 Again Custom Fitness</h1>
+  <p>Free health and fitness screening tools for women over 50 — no signup required.</p>
+</header>
+
+<main>
+  <div class="intro">
+    <h2>Where would you like to start?</h2>
+    <p>Each tool takes 2–5 minutes and gives you a personalized result with next steps.</p>
   </div>
 
-  <div id="status">Player X's turn</div>
+  <div class="tools-grid">
 
-  <div id="board">
-    <div class="cell" data-i="0"></div>
-    <div class="cell" data-i="1"></div>
-    <div class="cell" data-i="2"></div>
-    <div class="cell" data-i="3"></div>
-    <div class="cell" data-i="4"></div>
-    <div class="cell" data-i="5"></div>
-    <div class="cell" data-i="6"></div>
-    <div class="cell" data-i="7"></div>
-    <div class="cell" data-i="8"></div>
+    <a class="tool-card" href="sarcopenia-screen.html">
+      <div class="tool-icon">💪</div>
+      <h3>Sarcopenia Risk Screen</h3>
+      <p>Muscle loss is the #1 hidden threat to independence after 50. Find out if you're at risk with the clinically validated SARC-F questionnaire.</p>
+      <span class="tool-tag">5 Questions →</span>
+    </a>
+
+    <a class="tool-card" href="protein-calculator.html">
+      <div class="tool-icon">🥩</div>
+      <h3>Protein Needs Calculator</h3>
+      <p>After 50 your body needs more protein — but most women don't get enough. Get your personalized daily target based on your weight, activity, and goals.</p>
+      <span class="tool-tag">Instant Result →</span>
+    </a>
+
+    <a class="tool-card" href="osteoporosis-screen.html">
+      <div class="tool-icon">🦴</div>
+      <h3>Osteoporosis Risk Screen</h3>
+      <p>1 in 2 women over 50 will have a fracture due to bone loss. Identify your key risk factors before a break happens.</p>
+      <span class="tool-tag">7 Questions →</span>
+    </a>
+
+    <a class="tool-card" href="functional-fitness.html">
+      <div class="tool-icon">🚶</div>
+      <h3>Functional Fitness Assessment</h3>
+      <p>How well does your body actually move? Six simple self-tests measure your strength, balance, mobility, flexibility, and endurance.</p>
+      <span class="tool-tag">6 Self-Tests →</span>
+    </a>
+
+    <a class="tool-card" href="biological-age.html">
+      <div class="tool-icon">⏳</div>
+      <h3>Biological Age Estimator</h3>
+      <p>Your birth year is just a number. Find out how old your body is actually functioning — and which habits are aging you fastest.</p>
+      <span class="tool-tag">11 Questions →</span>
+    </a>
+
   </div>
 
-  <button id="restart">New Game</button>
+  <div class="cta-strip">
+    <h2>Ready to take action on your results?</h2>
+    <p>Stephen Holt is "America's Baby Boomer Fitness Expert" — specializing in strength training and nutrition coaching for women over 50 in Timonium, MD. Start with a free 1-week trial, no commitment needed.</p>
+    <div class="cta-buttons">
+      <a href="tel:+14104297029" class="btn-white">📞 (410) 429-7029</a>
+      <a href="mailto:info@29againfitness.com" class="btn-white">✉ Email Us</a>
+      <a href="https://29againfitness.com" target="_blank" class="btn-red">Try 1 Free Week →</a>
+    </div>
+  </div>
+</main>
 
-  <script>
-    const cells = document.querySelectorAll('.cell');
-    const status = document.getElementById('status');
-    const restartBtn = document.getElementById('restart');
-    const scoreX = document.getElementById('score-x');
-    const scoreO = document.getElementById('score-o');
-    const scoreD = document.getElementById('score-d');
+<footer>
+  &copy; 2026 <a href="https://29againfitness.com">29 Again Custom Fitness</a> &mdash; 2181 Greenspring Dr, Timonium, MD 21093
+</footer>
 
-    const WINS = [
-      [0,1,2],[3,4,5],[6,7,8],
-      [0,3,6],[1,4,7],[2,5,8],
-      [0,4,8],[2,4,6]
-    ];
-
-    let board, current, gameOver, scores;
-
-    function init() {
-      board = Array(9).fill('');
-      current = 'X';
-      gameOver = false;
-      cells.forEach(c => {
-        c.textContent = '';
-        c.className = 'cell';
-      });
-      status.textContent = `Player X's turn`;
-    }
-
-    function checkWinner() {
-      for (const [a,b,c] of WINS) {
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-          return { winner: board[a], line: [a,b,c] };
-        }
-      }
-      if (board.every(v => v)) return { winner: 'draw' };
-      return null;
-    }
-
-    cells.forEach(cell => {
-      cell.addEventListener('click', () => {
-        const i = +cell.dataset.i;
-        if (gameOver || board[i]) return;
-
-        board[i] = current;
-        cell.textContent = current;
-        cell.classList.add(current.toLowerCase(), 'taken');
-
-        const result = checkWinner();
-        if (result) {
-          gameOver = true;
-          if (result.winner === 'draw') {
-            status.textContent = "It's a draw!";
-            scoreD.textContent = +scoreD.textContent + 1;
-          } else {
-            status.textContent = `Player ${result.winner} wins!`;
-            result.line.forEach(idx => cells[idx].classList.add('win'));
-            if (result.winner === 'X') scoreX.textContent = +scoreX.textContent + 1;
-            else scoreO.textContent = +scoreO.textContent + 1;
-          }
-        } else {
-          current = current === 'X' ? 'O' : 'X';
-          status.textContent = `Player ${current}'s turn`;
-        }
-      });
-    });
-
-    restartBtn.addEventListener('click', init);
-
-    init();
-  </script>
 </body>
 </html>
