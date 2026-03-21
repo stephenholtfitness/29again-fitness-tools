@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Osteoporosis Risk Screen | 29 Again Custom Fitness</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --teal: #00859a; --red: #FF4140; --teal-dark: #006f80; --red-dark: #d93534; --light: #f4f8f9; --text: #2b2b2b; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--teal); color: white; text-align: center; padding: 1.5rem 1rem; }
+    header h1 { font-size: 1.8rem; font-weight: 700; }
+    header p { font-size: 0.95rem; margin-top: 0.3rem; opacity: 0.9; }
+    main { flex: 1; max-width: 680px; width: 100%; margin: 2rem auto; padding: 0 1rem; }
+    .intro { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 5px solid var(--teal); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .intro h2 { color: var(--teal); margin-bottom: 0.5rem; font-size: 1.15rem; }
+    .intro p { font-size: 0.95rem; line-height: 1.6; color: #555; }
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .card.answered { border-left: 5px solid var(--teal); }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .card h3 span.q-num { display: inline-block; background: var(--teal); color: white; border-radius: 50%; width: 26px; height: 26px; line-height: 26px; text-align: center; font-size: 0.85rem; margin-right: 0.5rem; }
+    .card .sub { font-size: 0.83rem; color: #888; margin-bottom: 0.9rem; }
+    .options { display: flex; flex-direction: column; gap: 0.6rem; }
+    .option { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.7rem 1rem; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 0.95rem; }
+    .option:hover { border-color: var(--teal); background: #eaf6f8; }
+    .option input[type="radio"] { accent-color: var(--teal); width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+    .option.selected { border-color: var(--teal); background: #eaf6f8; font-weight: 600; }
+    .option-sub { display: block; font-size: 0.8rem; color: #888; font-weight: 400; margin-top: 2px; }
+    /* Checkbox style */
+    .option input[type="checkbox"] { accent-color: var(--teal); width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+    .option.checked { border-color: var(--teal); background: #eaf6f8; }
+    #submit-btn { display: block; width: 100%; padding: 1rem; background: var(--red); color: white; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s, transform 0.1s; letter-spacing: 0.5px; }
+    #submit-btn:hover:not(:disabled) { background: var(--red-dark); transform: translateY(-1px); }
+    #submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+    #results { display: none; }
+    .risk-hero { border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .risk-hero.low { background: #e6f9f1; border: 2px solid #1a7f4f; }
+    .risk-hero.moderate { background: #fff8e6; border: 2px solid #e6a800; }
+    .risk-hero.high { background: #fff0f0; border: 2px solid var(--red); }
+    .risk-label { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .risk-hero.low .risk-label { color: #1a7f4f; }
+    .risk-hero.moderate .risk-label { color: #b37800; }
+    .risk-hero.high .risk-label { color: var(--red-dark); }
+    .risk-hero p { font-size: 0.95rem; color: #555; line-height: 1.6; }
+    .factor-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .factor-card h3 { color: var(--teal); margin-bottom: 0.75rem; font-size: 1rem; }
+    .factor-list { list-style: none; }
+    .factor-list li { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+    .factor-list li:last-child { border-bottom: none; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot.risk { background: var(--red); }
+    .dot.ok { background: #1a7f4f; }
+    .cta-box { background: var(--teal); color: white; border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+    .cta-box h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+    .cta-box p { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; }
+    .cta-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+    .cta-buttons a { display: inline-block; padding: 0.6rem 1.3rem; border-radius: 8px; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: opacity 0.2s; }
+    .cta-buttons a:hover { opacity: 0.85; }
+    .btn-white { background: white; color: var(--teal); }
+    .btn-red { background: var(--red); color: white; }
+    #retake-btn { display: block; width: 100%; margin-top: 0.75rem; background: none; border: 2px solid #ccc; border-radius: 8px; padding: 0.6rem; cursor: pointer; font-size: 0.9rem; color: #666; transition: border-color 0.2s; }
+    #retake-btn:hover { border-color: var(--teal); color: var(--teal); }
+    .disclaimer { font-size: 0.78rem; color: #aaa; margin-top: 1.5rem; line-height: 1.5; text-align: center; }
+    footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #888; }
+    footer a { color: var(--teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>29 Again Custom Fitness</h1>
+  <p>Osteoporosis Risk Screen</p>
+</header>
+<main>
+  <div class="intro">
+    <h2>Know Your Bone Health Risk</h2>
+    <p>Osteoporosis — the thinning of bones — affects 1 in 2 women over 50 and is a major cause of fractures. Most people have no symptoms until a break occurs. This screen helps you identify risk factors so you can take action before a fracture happens.</p>
+  </div>
+
+  <div id="form-section">
+
+    <div class="card" id="card-age">
+      <h3><span class="q-num">1</span> How old are you?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="age" value="0"> Under 50</label>
+        <label class="option"><input type="radio" name="age" value="1"> 50–64</label>
+        <label class="option"><input type="radio" name="age" value="2"> 65 or older</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-sex">
+      <h3><span class="q-num">2</span> Were you born female?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="sex" value="1"> Yes</label>
+        <label class="option"><input type="radio" name="sex" value="0"> No</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-menopause">
+      <h3><span class="q-num">3</span> Have you gone through menopause?</h3>
+      <p class="sub">Estrogen loss after menopause accelerates bone loss.</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="menopause" value="1"> Yes</label>
+        <label class="option"><input type="radio" name="menopause" value="0"> No / Not applicable</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-fracture">
+      <h3><span class="q-num">4</span> Have you ever broken a bone as an adult from a minor fall or bump?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="fracture" value="2"> Yes</label>
+        <label class="option"><input type="radio" name="fracture" value="0"> No</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-family">
+      <h3><span class="q-num">5</span> Has a parent or sibling been diagnosed with osteoporosis or had a hip fracture?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="family" value="1"> Yes</label>
+        <label class="option"><input type="radio" name="family" value="0"> No / Don't know</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-build">
+      <h3><span class="q-num">6</span> How would you describe your body frame / build?</h3>
+      <p class="sub">Smaller, lighter frames tend to have lower bone density.</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="build" value="1"> Small or thin frame</label>
+        <label class="option"><input type="radio" name="build" value="0"> Medium or large frame</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-lifestyle">
+      <h3><span class="q-num">7</span> Select any that apply to you:</h3>
+      <p class="sub">Check all that apply.</p>
+      <div class="options" id="lifestyle-checks">
+        <label class="option"><input type="checkbox" value="1" name="lifestyle"> I smoke or have smoked regularly</label>
+        <label class="option"><input type="checkbox" value="1" name="lifestyle"> I drink more than 2 alcoholic drinks per day</label>
+        <label class="option"><input type="checkbox" value="1" name="lifestyle"> I have low calcium or vitamin D intake</label>
+        <label class="option"><input type="checkbox" value="1" name="lifestyle"> I am mostly sedentary / do little weight-bearing exercise</label>
+        <label class="option"><input type="checkbox" value="1" name="lifestyle"> I have taken corticosteroids (prednisone) for 3+ months</label>
+        <label class="option"><input type="checkbox" value="0" name="lifestyle-none"> None of the above</label>
+      </div>
+    </div>
+
+    <button type="button" id="submit-btn" disabled onclick="calculate()">See My Risk Level</button>
+  </div>
+
+  <div id="results">
+    <div class="risk-hero" id="risk-hero">
+      <div class="risk-label" id="risk-label"></div>
+      <p id="risk-desc"></p>
+    </div>
+
+    <div class="factor-card">
+      <h3>Your Risk Factors</h3>
+      <ul class="factor-list" id="factor-list"></ul>
+    </div>
+
+    <div class="factor-card">
+      <h3>What You Can Do Now</h3>
+      <ul class="factor-list" id="action-list"></ul>
+    </div>
+
+    <div class="cta-box">
+      <h3>Strength training is one of the best ways to protect your bones.</h3>
+      <p>Weight-bearing and resistance exercise directly stimulates bone density. Stephen Holt specializes in exactly this for women over 50.</p>
+      <div class="cta-buttons">
+        <a href="tel:+14104297029" class="btn-white">📞 (410) 429-7029</a>
+        <a href="mailto:info@29againfitness.com" class="btn-white">✉ Email Us</a>
+        <a href="https://29againfitness.com" target="_blank" class="btn-red">Try 1 Free Week →</a>
+      </div>
+    </div>
+
+    <button id="retake-btn" onclick="retake()">Retake the Screen</button>
+    <p class="disclaimer">This screen is for educational purposes only and is not a medical diagnosis. Talk to your doctor about a DEXA bone density scan if you have concerns.</p>
+  </div>
+</main>
+<footer>&copy; 2026 <a href="https://29againfitness.com">29 Again Custom Fitness</a> &mdash; Timonium, MD &mdash; (410) 429-7029</footer>
+
+<script>
+  const requiredRadios = ['age','sex','menopause','fracture','family','build'];
+
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll(`input[name="${r.name}"]`).forEach(x => x.closest('.option').classList.remove('selected'));
+      r.closest('.option').classList.add('selected');
+      checkReady();
+    });
+  });
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.option').classList.toggle('checked', cb.checked);
+      checkReady();
+    });
+  });
+
+  function checkReady() {
+    const allAnswered = requiredRadios.every(name => document.querySelector(`input[name="${name}"]:checked`));
+    document.getElementById('submit-btn').disabled = !allAnswered;
+  }
+
+  function calculate() {
+    let score = 0;
+    const factors = [];
+    const actions = [];
+
+    const age = parseInt(document.querySelector('input[name="age"]:checked').value);
+    score += age;
+    if (age === 2) factors.push({ risk: true, text: 'Age 65+ — highest risk age group' });
+    else if (age === 1) factors.push({ risk: true, text: 'Age 50–64 — risk increases significantly after 50' });
+    else factors.push({ risk: false, text: 'Under 50 — lower age-related risk currently' });
+
+    const sex = parseInt(document.querySelector('input[name="sex"]:checked').value);
+    score += sex;
+    if (sex) factors.push({ risk: true, text: 'Female sex — women have higher osteoporosis risk' });
+
+    const meno = parseInt(document.querySelector('input[name="menopause"]:checked').value);
+    score += meno;
+    if (meno) factors.push({ risk: true, text: 'Post-menopausal — estrogen loss accelerates bone loss' });
+
+    const fracture = parseInt(document.querySelector('input[name="fracture"]:checked').value);
+    score += fracture;
+    if (fracture) factors.push({ risk: true, text: 'Prior low-trauma fracture — strong indicator of reduced bone density' });
+    else factors.push({ risk: false, text: 'No prior low-trauma fractures' });
+
+    const family = parseInt(document.querySelector('input[name="family"]:checked').value);
+    score += family;
+    if (family) factors.push({ risk: true, text: 'Family history of osteoporosis or hip fracture' });
+    else factors.push({ risk: false, text: 'No known family history' });
+
+    const build = parseInt(document.querySelector('input[name="build"]:checked').value);
+    score += build;
+    if (build) factors.push({ risk: true, text: 'Small/thin frame — associated with lower baseline bone mass' });
+    else factors.push({ risk: false, text: 'Medium/large frame — generally protective' });
+
+    const checks = document.querySelectorAll('input[name="lifestyle"]:checked');
+    score += checks.length;
+    checks.forEach(c => {
+      factors.push({ risk: true, text: c.closest('.option').textContent.trim() });
+    });
+
+    // Risk level
+    const hero = document.getElementById('risk-hero');
+    const label = document.getElementById('risk-label');
+    const desc = document.getElementById('risk-desc');
+
+    if (score <= 2) {
+      hero.className = 'risk-hero low';
+      label.textContent = '✓ Lower Risk';
+      desc.textContent = `You have few risk factors for osteoporosis right now. Staying active with weight-bearing exercise and maintaining good nutrition will help protect your bones as you age.`;
+    } else if (score <= 5) {
+      hero.className = 'risk-hero moderate';
+      label.textContent = '⚠ Moderate Risk';
+      desc.textContent = `You have several risk factors that warrant attention. Consider discussing a DEXA bone density scan with your doctor, and prioritize bone-strengthening habits now.`;
+    } else {
+      hero.className = 'risk-hero high';
+      label.textContent = '⚠ Higher Risk';
+      desc.textContent = `You have multiple significant risk factors for osteoporosis. We strongly recommend speaking with your doctor about a DEXA scan and a bone health plan — and starting strength training as soon as possible.`;
+    }
+
+    // Factor list
+    const fl = document.getElementById('factor-list');
+    fl.innerHTML = '';
+    factors.forEach(f => {
+      fl.innerHTML += `<li><span class="dot ${f.risk ? 'risk' : 'ok'}"></span>${f.text}</li>`;
+    });
+
+    // Actions
+    const al = document.getElementById('action-list');
+    const actionItems = [
+      'Talk to your doctor about a DEXA bone density scan',
+      'Do weight-bearing and resistance exercise 3+ days/week',
+      'Get 1,200mg calcium daily (food first, then supplement)',
+      'Get adequate vitamin D (ask your doctor to check your levels)',
+      'Limit alcohol to 1 drink/day or less',
+      'Quit smoking if applicable',
+      'Work on balance to reduce fall risk',
+    ];
+    al.innerHTML = actionItems.map(a => `<li><span class="dot ok"></span>${a}</li>`).join('');
+
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function retake() {
+    document.querySelectorAll('input[type="radio"]').forEach(r => { r.checked = false; r.closest('.option').classList.remove('selected'); });
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; cb.closest('.option').classList.remove('checked'); });
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('form-section').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

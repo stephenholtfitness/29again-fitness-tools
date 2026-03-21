@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biological Age Estimator | 29 Again Custom Fitness</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --teal: #00859a; --red: #FF4140; --teal-dark: #006f80; --red-dark: #d93534; --light: #f4f8f9; --text: #2b2b2b; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--teal); color: white; text-align: center; padding: 1.5rem 1rem; }
+    header h1 { font-size: 1.8rem; font-weight: 700; }
+    header p { font-size: 0.95rem; margin-top: 0.3rem; opacity: 0.9; }
+    main { flex: 1; max-width: 680px; width: 100%; margin: 2rem auto; padding: 0 1rem; }
+    .intro { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 5px solid var(--teal); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .intro h2 { color: var(--teal); margin-bottom: 0.5rem; font-size: 1.15rem; }
+    .intro p { font-size: 0.95rem; line-height: 1.6; color: #555; }
+    .section-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); margin: 1.5rem 0 0.75rem; }
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .card.answered { border-left: 5px solid var(--teal); }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .card h3 span.q-num { display: inline-block; background: var(--teal); color: white; border-radius: 50%; width: 26px; height: 26px; line-height: 26px; text-align: center; font-size: 0.85rem; margin-right: 0.5rem; }
+    .card .sub { font-size: 0.82rem; color: #888; margin-bottom: 0.85rem; }
+    .options { display: flex; flex-direction: column; gap: 0.6rem; }
+    .option { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.7rem 1rem; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 0.9rem; }
+    .option:hover { border-color: var(--teal); background: #eaf6f8; }
+    .option input { accent-color: var(--teal); width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+    .option.selected { border-color: var(--teal); background: #eaf6f8; font-weight: 600; }
+    /* Age input */
+    .age-input { display: flex; align-items: center; gap: 1rem; }
+    .age-input input[type="number"] { width: 120px; padding: 0.7rem 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1.2rem; text-align: center; outline: none; transition: border-color 0.2s; }
+    .age-input input[type="number"]:focus { border-color: var(--teal); }
+    .age-input span { color: #888; font-size: 0.9rem; }
+    #submit-btn { display: block; width: 100%; padding: 1rem; background: var(--red); color: white; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s, transform 0.1s; letter-spacing: 0.5px; margin-top: 0.5rem; }
+    #submit-btn:hover:not(:disabled) { background: var(--red-dark); transform: translateY(-1px); }
+    #submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+    /* Results */
+    #results { display: none; }
+    .age-hero { border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .age-hero.younger { background: linear-gradient(135deg, #e6f9f1, #d0f0e6); border: 2px solid #1a7f4f; }
+    .age-hero.same { background: linear-gradient(135deg, #eaf6f8, #d0edf3); border: 2px solid var(--teal); }
+    .age-hero.older { background: linear-gradient(135deg, #fff0f0, #ffd6d6); border: 2px solid var(--red); }
+    .age-comparison { display: flex; justify-content: center; align-items: center; gap: 2rem; margin: 1rem 0; flex-wrap: wrap; }
+    .age-box { text-align: center; }
+    .age-box .age-num { font-size: 3rem; font-weight: 800; line-height: 1; }
+    .age-box .age-lbl { font-size: 0.8rem; color: #666; margin-top: 0.2rem; }
+    .age-hero.younger .bio-num { color: #1a7f4f; }
+    .age-hero.same .bio-num { color: var(--teal); }
+    .age-hero.older .bio-num { color: var(--red-dark); }
+    .chron-num { color: #888; }
+    .age-arrow { font-size: 1.5rem; color: #bbb; }
+    .hero-msg { font-size: 1rem; font-weight: 600; margin-top: 0.5rem; }
+    .hero-sub { font-size: 0.88rem; color: #666; margin-top: 0.3rem; line-height: 1.5; }
+    .breakdown-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .breakdown-card h3 { color: var(--teal); margin-bottom: 1rem; font-size: 1rem; }
+    .factor-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
+    .factor-row:last-child { border-bottom: none; }
+    .factor-bar-wrap { flex: 1; background: #f0f0f0; border-radius: 4px; height: 8px; overflow: hidden; }
+    .factor-bar { height: 8px; border-radius: 4px; }
+    .bar-good { background: #1a7f4f; }
+    .bar-ok { background: var(--teal); }
+    .bar-warn { background: #e6a800; }
+    .bar-risk { background: var(--red); }
+    .factor-delta { font-size: 0.82rem; font-weight: 700; width: 50px; text-align: right; flex-shrink: 0; }
+    .delta-pos { color: #1a7f4f; }
+    .delta-neg { color: var(--red-dark); }
+    .delta-neu { color: #888; }
+    .cta-box { background: var(--teal); color: white; border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+    .cta-box h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+    .cta-box p { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; }
+    .cta-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+    .cta-buttons a { display: inline-block; padding: 0.6rem 1.3rem; border-radius: 8px; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: opacity 0.2s; }
+    .cta-buttons a:hover { opacity: 0.85; }
+    .btn-white { background: white; color: var(--teal); }
+    .btn-red { background: var(--red); color: white; }
+    #retake-btn { display: block; width: 100%; margin-top: 0.75rem; background: none; border: 2px solid #ccc; border-radius: 8px; padding: 0.6rem; cursor: pointer; font-size: 0.9rem; color: #666; transition: border-color 0.2s; }
+    #retake-btn:hover { border-color: var(--teal); color: var(--teal); }
+    .disclaimer { font-size: 0.78rem; color: #aaa; margin-top: 1.5rem; line-height: 1.5; text-align: center; }
+    footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #888; }
+    footer a { color: var(--teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>29 Again Custom Fitness</h1>
+  <p>Biological Age Estimator</p>
+</header>
+<main>
+  <div class="intro">
+    <h2>Your Age on the Inside May Be Different</h2>
+    <p>Chronological age is just a number. Your <strong>biological age</strong> reflects how well your body is actually aging based on your lifestyle habits. People with healthy habits can have a biological age 10–15 years younger than their birth year. This quiz estimates yours.</p>
+  </div>
+
+  <div id="form-section">
+
+    <div class="card" id="card-chron">
+      <h3><span class="q-num">—</span> Your Chronological Age</h3>
+      <div class="age-input">
+        <input type="number" id="chron-age" min="30" max="90" placeholder="e.g. 58" />
+        <span>years old</span>
+      </div>
+    </div>
+
+    <div class="section-label">Physical Activity</div>
+
+    <div class="card" id="card-0">
+      <h3><span class="q-num">1</span> How often do you do resistance / strength training?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q0" value="3"> 3 or more times per week</label>
+        <label class="option"><input type="radio" name="q0" value="1"> 1–2 times per week</label>
+        <label class="option"><input type="radio" name="q0" value="0"> Rarely or never</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-1">
+      <h3><span class="q-num">2</span> How often do you do cardio / aerobic exercise?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q1" value="3"> 150+ min/week (walks, bike, swim, etc.)</label>
+        <label class="option"><input type="radio" name="q1" value="1"> 60–149 min/week</label>
+        <label class="option"><input type="radio" name="q1" value="0"> Less than 60 min/week</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-2">
+      <h3><span class="q-num">3</span> How much of your day do you spend sitting?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q2" value="3"> Less than 4 hours</label>
+        <label class="option"><input type="radio" name="q2" value="1"> 4–8 hours</label>
+        <label class="option"><input type="radio" name="q2" value="0"> More than 8 hours</label>
+      </div>
+    </div>
+
+    <div class="section-label">Nutrition</div>
+
+    <div class="card" id="card-3">
+      <h3><span class="q-num">4</span> How would you describe your daily diet?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q3" value="3"> Mostly whole foods — vegetables, lean protein, minimal processed food</label>
+        <label class="option"><input type="radio" name="q3" value="1"> Mixed — some healthy, some processed</label>
+        <label class="option"><input type="radio" name="q3" value="0"> Mostly processed, fast food, or high sugar</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-4">
+      <h3><span class="q-num">5</span> How much water do you drink daily?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q4" value="2"> 64 oz (8 cups) or more</label>
+        <label class="option"><input type="radio" name="q4" value="1"> 32–63 oz</label>
+        <label class="option"><input type="radio" name="q4" value="0"> Less than 32 oz</label>
+      </div>
+    </div>
+
+    <div class="section-label">Sleep &amp; Recovery</div>
+
+    <div class="card" id="card-5">
+      <h3><span class="q-num">6</span> How many hours of sleep do you get most nights?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q5" value="3"> 7–9 hours</label>
+        <label class="option"><input type="radio" name="q5" value="1"> 6 hours</label>
+        <label class="option"><input type="radio" name="q5" value="0"> 5 or fewer hours</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-6">
+      <h3><span class="q-num">7</span> How would you rate your sleep quality?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q6" value="2"> Mostly restful — I wake up refreshed</label>
+        <label class="option"><input type="radio" name="q6" value="1"> Okay — some nights are rough</label>
+        <label class="option"><input type="radio" name="q6" value="0"> Poor — I'm often tired during the day</label>
+      </div>
+    </div>
+
+    <div class="section-label">Stress &amp; Mental Health</div>
+
+    <div class="card" id="card-7">
+      <h3><span class="q-num">8</span> How would you rate your stress level most days?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q7" value="2"> Low — I manage stress well</label>
+        <label class="option"><input type="radio" name="q7" value="1"> Moderate — some tension but manageable</label>
+        <label class="option"><input type="radio" name="q7" value="0"> High — I feel stressed or overwhelmed often</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-8">
+      <h3><span class="q-num">9</span> How often do you engage socially or do things you enjoy?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q8" value="2"> Regularly — I have strong social connections and hobbies</label>
+        <label class="option"><input type="radio" name="q8" value="1"> Sometimes</label>
+        <label class="option"><input type="radio" name="q8" value="0"> Rarely — I feel isolated or lack purpose</label>
+      </div>
+    </div>
+
+    <div class="section-label">Lifestyle Habits</div>
+
+    <div class="card" id="card-9">
+      <h3><span class="q-num">10</span> Do you smoke?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q9" value="2"> Never or quit more than 10 years ago</label>
+        <label class="option"><input type="radio" name="q9" value="1"> Quit within the last 10 years</label>
+        <label class="option"><input type="radio" name="q9" value="0"> Current smoker</label>
+      </div>
+    </div>
+
+    <div class="card" id="card-10">
+      <h3><span class="q-num">11</span> How much alcohol do you drink?</h3>
+      <div class="options">
+        <label class="option"><input type="radio" name="q10" value="2"> None or very rarely</label>
+        <label class="option"><input type="radio" name="q10" value="1"> 1–7 drinks per week</label>
+        <label class="option"><input type="radio" name="q10" value="0"> 8 or more drinks per week</label>
+      </div>
+    </div>
+
+    <button type="button" id="submit-btn" disabled onclick="calculate()">Estimate My Biological Age</button>
+  </div>
+
+  <div id="results">
+    <div class="age-hero" id="age-hero">
+      <div class="age-comparison">
+        <div class="age-box">
+          <div class="age-num chron-num" id="chron-display">—</div>
+          <div class="age-lbl">Chronological Age</div>
+        </div>
+        <div class="age-arrow">→</div>
+        <div class="age-box">
+          <div class="age-num bio-num" id="bio-display">—</div>
+          <div class="age-lbl">Biological Age</div>
+        </div>
+      </div>
+      <div class="hero-msg" id="hero-msg"></div>
+      <div class="hero-sub" id="hero-sub"></div>
+    </div>
+
+    <div class="breakdown-card">
+      <h3>How Each Area Affects Your Age</h3>
+      <div id="factor-breakdown"></div>
+    </div>
+
+    <div class="breakdown-card">
+      <h3>Biggest Opportunities to Lower Your Biological Age</h3>
+      <div id="opp-list"></div>
+    </div>
+
+    <div class="cta-box">
+      <h3>Want to turn back the clock?</h3>
+      <p>Strength training is the #1 proven intervention for reversing biological aging. Stephen Holt builds personalized programs for women over 50 that target exactly this.</p>
+      <div class="cta-buttons">
+        <a href="tel:+14104297029" class="btn-white">📞 (410) 429-7029</a>
+        <a href="mailto:info@29againfitness.com" class="btn-white">✉ Email Us</a>
+        <a href="https://29againfitness.com" target="_blank" class="btn-red">Try 1 Free Week →</a>
+      </div>
+    </div>
+
+    <button id="retake-btn" onclick="retake()">Retake the Quiz</button>
+    <p class="disclaimer">This estimator is based on lifestyle factors associated with biological aging in research literature. It is not a medical test and does not measure biomarkers. Results are for motivational and educational purposes only.</p>
+  </div>
+</main>
+<footer>&copy; 2026 <a href="https://29againfitness.com">29 Again Custom Fitness</a> &mdash; Timonium, MD &mdash; (410) 429-7029</footer>
+
+<script>
+  const questions = [
+    { name: 'q0', label: 'Strength Training', max: 3, impact: 3, opp: 'Adding strength training 3x/week can reduce biological age by up to 3 years.' },
+    { name: 'q1', label: 'Cardio Exercise', max: 3, impact: 3, opp: 'Meeting the 150 min/week cardio guideline is one of the strongest longevity predictors.' },
+    { name: 'q2', label: 'Daily Movement', max: 3, impact: 2, opp: 'Breaking up sitting time with movement every hour has significant metabolic benefits.' },
+    { name: 'q3', label: 'Diet Quality', max: 3, impact: 3, opp: 'A whole-food diet rich in vegetables and lean protein is strongly linked to slower aging.' },
+    { name: 'q4', label: 'Hydration', max: 2, impact: 1, opp: 'Proper hydration supports every body system and aids cellular function.' },
+    { name: 'q5', label: 'Sleep Duration', max: 3, impact: 3, opp: '7–9 hours of sleep is when cellular repair and hormone regulation peak.' },
+    { name: 'q6', label: 'Sleep Quality', max: 2, impact: 2, opp: 'Improving sleep quality reduces inflammation and cortisol — both accelerate aging.' },
+    { name: 'q7', label: 'Stress Management', max: 2, impact: 2, opp: 'Chronic stress shortens telomeres (a marker of cellular aging). Stress management helps.' },
+    { name: 'q8', label: 'Social Connection', max: 2, impact: 2, opp: 'Strong social ties are linked to a 50% greater chance of longevity in research studies.' },
+    { name: 'q9', label: 'Smoking', max: 2, impact: 4, opp: 'Smoking is the single fastest way to age biologically. Quitting has immediate benefits.' },
+    { name: 'q10', label: 'Alcohol', max: 2, impact: 2, opp: 'Reducing alcohol intake lowers inflammation and improves liver and sleep function.' },
+  ];
+
+  const totalMax = questions.reduce((s, q) => s + q.max, 0); // 27
+
+  const requiredNames = questions.map(q => q.name);
+
+  document.getElementById('chron-age').addEventListener('input', checkReady);
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll(`input[name="${r.name}"]`).forEach(x => x.closest('.option').classList.remove('selected'));
+      r.closest('.option').classList.add('selected');
+      const idx = requiredNames.indexOf(r.name);
+      if (idx >= 0) document.getElementById('card-' + idx).classList.add('answered');
+      checkReady();
+    });
+  });
+
+  function checkReady() {
+    const age = parseInt(document.getElementById('chron-age').value);
+    const allAnswered = requiredNames.every(n => document.querySelector(`input[name="${n}"]:checked`));
+    document.getElementById('submit-btn').disabled = !(age >= 30 && age <= 90 && allAnswered);
+  }
+
+  function calculate() {
+    const chron = parseInt(document.getElementById('chron-age').value);
+    let score = 0;
+    const breakdown = document.getElementById('factor-breakdown');
+    const oppList = document.getElementById('opp-list');
+    breakdown.innerHTML = '';
+    oppList.innerHTML = '';
+
+    const opportunities = [];
+
+    questions.forEach(q => {
+      const val = parseInt(document.querySelector(`input[name="${q.name}"]:checked`).value);
+      score += val;
+      const pct = Math.round((val / q.max) * 100);
+      const barClass = pct >= 80 ? 'bar-good' : pct >= 50 ? 'bar-ok' : pct >= 25 ? 'bar-warn' : 'bar-risk';
+      const delta = val === q.max ? 0 : -(q.max - val);
+
+      breakdown.innerHTML += `
+        <div class="factor-row">
+          <span style="width:160px;flex-shrink:0;">${q.label}</span>
+          <div class="factor-bar-wrap"><div class="factor-bar ${barClass}" style="width:${pct}%"></div></div>
+          <span class="factor-delta ${delta < 0 ? 'delta-neg' : 'delta-neu'}">${delta < 0 ? delta + ' yr' : '✓'}</span>
+        </div>`;
+
+      if (val < q.max) {
+        opportunities.push({ impact: q.max - val, text: q.opp });
+      }
+    });
+
+    // Bio age: map score to age adjustment (-10 to +10 years)
+    const ratio = score / totalMax; // 0–1
+    const adjustment = Math.round((1 - ratio) * 14 - 7); // -7 (best) to +7 (worst)
+    const bioAge = chron + adjustment;
+
+    document.getElementById('chron-display').textContent = chron;
+    document.getElementById('bio-display').textContent = bioAge;
+
+    const hero = document.getElementById('age-hero');
+    const msg = document.getElementById('hero-msg');
+    const sub = document.getElementById('hero-sub');
+
+    if (bioAge < chron - 1) {
+      hero.className = 'age-hero younger';
+      msg.textContent = `You're aging ${chron - bioAge} years younger than your birth age!`;
+      sub.textContent = 'Your lifestyle habits are doing real work. Keep it up — and there\'s still room to go even younger.';
+    } else if (bioAge <= chron + 1) {
+      hero.className = 'age-hero same';
+      msg.textContent = 'Your biological age matches your chronological age.';
+      sub.textContent = 'You\'re on track. With a few targeted changes, you could turn back the clock by several years.';
+    } else {
+      hero.className = 'age-hero older';
+      msg.textContent = `Your lifestyle is aging you ${bioAge - chron} years faster than necessary.`;
+      sub.textContent = 'The good news: biological aging is highly reversible. The right habits can subtract years — quickly.';
+    }
+
+    // Top opportunities
+    opportunities.sort((a, b) => b.impact - a.impact).slice(0, 3).forEach(o => {
+      oppList.innerHTML += `<div class="factor-row" style="align-items:flex-start;"><span style="font-size:1.1rem;flex-shrink:0;">▶</span><span style="font-size:0.88rem;line-height:1.5;">${o.text}</span></div>`;
+    });
+
+    if (opportunities.length === 0) {
+      oppList.innerHTML = '<div class="factor-row"><span>🌟 You\'re optimizing all the key habits. Focus on consistency and progressive challenge.</span></div>';
+    }
+
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function retake() {
+    document.getElementById('chron-age').value = '';
+    document.querySelectorAll('input[type="radio"]').forEach(r => { r.checked = false; r.closest('.option').classList.remove('selected'); });
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('answered'));
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('form-section').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

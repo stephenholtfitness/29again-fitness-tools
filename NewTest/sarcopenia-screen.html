@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sarcopenia Risk Screen | 29 Again Custom Fitness</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #00859a;
+      --red: #FF4140;
+      --teal-dark: #006f80;
+      --red-dark: #d93534;
+      --light: #f4f8f9;
+      --text: #2b2b2b;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--light);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--teal);
+      color: white;
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      margin-top: 0.3rem;
+      opacity: 0.9;
+    }
+
+    main {
+      flex: 1;
+      max-width: 680px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .intro {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-left: 5px solid var(--teal);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .intro h2 {
+      color: var(--teal);
+      margin-bottom: 0.5rem;
+      font-size: 1.15rem;
+    }
+
+    .intro p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    .question-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      transition: box-shadow 0.2s;
+    }
+
+    .question-card.answered {
+      border-left: 5px solid var(--teal);
+    }
+
+    .question-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .question-card h3 span.q-num {
+      display: inline-block;
+      background: var(--teal);
+      color: white;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
+      text-align: center;
+      font-size: 0.85rem;
+      margin-right: 0.5rem;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .option:hover {
+      border-color: var(--teal);
+      background: #eaf6f8;
+    }
+
+    .option input[type="radio"] {
+      accent-color: var(--teal);
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .option.selected {
+      border-color: var(--teal);
+      background: #eaf6f8;
+      font-weight: 600;
+    }
+
+    #submit-btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      background: var(--red);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    #submit-btn:hover:not(:disabled) {
+      background: var(--red-dark);
+      transform: translateY(-1px);
+    }
+
+    #submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Results */
+    #results {
+      display: none;
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    #results h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .score-display {
+      font-size: 4rem;
+      font-weight: 800;
+      margin: 1rem 0 0.25rem;
+    }
+
+    .score-label {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 1.5rem;
+    }
+
+    .risk-banner {
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .risk-low {
+      background: #e6f9f1;
+      color: #1a7f4f;
+      border: 2px solid #1a7f4f;
+    }
+
+    .risk-high {
+      background: #fff0f0;
+      color: var(--red-dark);
+      border: 2px solid var(--red);
+    }
+
+    .result-detail {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .cta-box {
+      background: var(--teal);
+      color: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .cta-box h3 {
+      font-size: 1.15rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .cta-box p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-bottom: 1rem;
+    }
+
+    .cta-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .cta-buttons a {
+      display: inline-block;
+      padding: 0.6rem 1.3rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .cta-buttons a:hover { opacity: 0.85; }
+
+    .btn-white {
+      background: white;
+      color: var(--teal);
+    }
+
+    .btn-red {
+      background: var(--red);
+      color: white;
+    }
+
+    #retake-btn {
+      margin-top: 0.75rem;
+      background: none;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 0.5rem 1.2rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #666;
+      transition: border-color 0.2s;
+    }
+
+    #retake-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+    .disclaimer {
+      font-size: 0.78rem;
+      color: #aaa;
+      margin-top: 1.5rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.4rem; }
+      .score-display { font-size: 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>29 Again Custom Fitness</h1>
+  <p>Sarcopenia Risk Screening Tool &mdash; SARC-F Questionnaire</p>
+</header>
+
+<main>
+  <div class="intro">
+    <h2>What is Sarcopenia?</h2>
+    <p>Sarcopenia is the age-related loss of muscle mass and strength that can affect your balance, mobility, and independence. This quick 5-question screen helps identify your risk level so you can take action early.</p>
+  </div>
+
+  <form id="sarc-form">
+
+    <div class="question-card" id="card-0">
+      <h3><span class="q-num">1</span> Strength — Lifting &amp; Carrying</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">How much difficulty do you have lifting and carrying 10 pounds?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q0" value="0"> None</label>
+        <label class="option"><input type="radio" name="q0" value="1"> Some difficulty</label>
+        <label class="option"><input type="radio" name="q0" value="2"> A lot of difficulty or unable</label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-1">
+      <h3><span class="q-num">2</span> Assistance Walking</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">How much difficulty do you have walking across a room?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q1" value="0"> None</label>
+        <label class="option"><input type="radio" name="q1" value="1"> Some difficulty</label>
+        <label class="option"><input type="radio" name="q1" value="2"> A lot of difficulty, use aids, or unable</label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-2">
+      <h3><span class="q-num">3</span> Rise from a Chair</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">How much difficulty do you have transferring from a chair or bed?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q2" value="0"> None</label>
+        <label class="option"><input type="radio" name="q2" value="1"> Some difficulty</label>
+        <label class="option"><input type="radio" name="q2" value="2"> A lot of difficulty or unable without help</label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-3">
+      <h3><span class="q-num">4</span> Climb Stairs</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">How much difficulty do you have climbing a flight of 10 stairs?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q3" value="0"> None</label>
+        <label class="option"><input type="radio" name="q3" value="1"> Some difficulty</label>
+        <label class="option"><input type="radio" name="q3" value="2"> A lot of difficulty or unable</label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-4">
+      <h3><span class="q-num">5</span> Falls</h3>
+      <p style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">How many times have you fallen in the past year?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q4" value="0"> None</label>
+        <label class="option"><input type="radio" name="q4" value="1"> 1–3 falls</label>
+        <label class="option"><input type="radio" name="q4" value="2"> 4 or more falls</label>
+      </div>
+    </div>
+
+    <button type="submit" id="submit-btn" disabled>See My Results</button>
+  </form>
+
+  <div id="results">
+    <h2>Your SARC-F Result</h2>
+    <div class="score-display" id="score-val">—</div>
+    <div class="score-label">out of 10</div>
+    <div class="risk-banner" id="risk-banner"></div>
+    <p class="result-detail" id="result-detail"></p>
+
+    <div class="cta-box">
+      <h3>Ready to build strength and protect your independence?</h3>
+      <p>Stephen Holt specializes in strength training for women over 50. Start with a free 1-week trial — no commitment needed.</p>
+      <div class="cta-buttons">
+        <a href="tel:+14104297029" class="btn-white">📞 Call (410) 429-7029</a>
+        <a href="mailto:info@29againfitness.com" class="btn-white">✉ Email Us</a>
+        <a href="https://29againfitness.com" target="_blank" class="btn-red">Try 1 Free Week →</a>
+      </div>
+    </div>
+
+    <button id="retake-btn">Retake the Screen</button>
+
+    <p class="disclaimer">This tool is for informational purposes only and is not a medical diagnosis. Please consult your physician or a qualified healthcare provider for a full evaluation.</p>
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 <a href="https://29againfitness.com">29 Again Custom Fitness</a> &mdash; Timonium, MD &mdash; (410) 429-7029
+</footer>
+
+<script>
+  const form = document.getElementById('sarc-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const resultsDiv = document.getElementById('results');
+
+  // Highlight selected option & check completeness
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const name = radio.name;
+      // Clear siblings
+      document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+        r.closest('.option').classList.remove('selected');
+      });
+      radio.closest('.option').classList.add('selected');
+
+      // Mark card answered
+      const cardIndex = name.replace('q','');
+      document.getElementById('card-' + cardIndex).classList.add('answered');
+
+      // Enable submit if all answered
+      const answered = [...document.querySelectorAll('input[type="radio"]:checked')];
+      submitBtn.disabled = answered.length < 5;
+    });
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const radios = document.querySelectorAll('input[type="radio"]:checked');
+    let score = 0;
+    radios.forEach(r => score += parseInt(r.value));
+
+    document.getElementById('score-val').textContent = score;
+
+    const banner = document.getElementById('risk-banner');
+    const detail = document.getElementById('result-detail');
+
+    if (score >= 4) {
+      banner.className = 'risk-banner risk-high';
+      banner.textContent = '⚠ Positive Screen — Elevated Sarcopenia Risk';
+      detail.innerHTML = `A score of <strong>${score}/10</strong> suggests you may be at elevated risk for sarcopenia. This doesn't mean you have sarcopenia — but it's a strong signal that building muscle strength should be a priority for your health and independence.<br><br>The good news: <strong>resistance training is the most effective intervention</strong>, and it's never too late to start. Stephen Holt works specifically with women over 50 to build functional strength safely and effectively.`;
+    } else {
+      banner.className = 'risk-banner risk-low';
+      banner.textContent = '✓ Negative Screen — Lower Risk at This Time';
+      detail.innerHTML = `A score of <strong>${score}/10</strong> suggests you are at lower risk for sarcopenia right now — great news! However, muscle loss is a gradual process that begins in your 30s and accelerates with age.<br><br><strong>Staying proactive with strength training</strong> is the best way to protect your muscle mass, bone density, and mobility as you age. Let's keep you ahead of it.`;
+    }
+
+    form.style.display = 'none';
+    resultsDiv.style.display = 'block';
+    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  document.getElementById('retake-btn').addEventListener('click', () => {
+    form.reset();
+    document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.question-card').forEach(c => c.classList.remove('answered'));
+    submitBtn.disabled = true;
+    form.style.display = 'block';
+    resultsDiv.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>

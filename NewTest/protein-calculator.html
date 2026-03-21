@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Protein Needs Calculator | 29 Again Custom Fitness</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #00859a;
+      --red: #FF4140;
+      --teal-dark: #006f80;
+      --red-dark: #d93534;
+      --light: #f4f8f9;
+      --text: #2b2b2b;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--light);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--teal);
+      color: white;
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
+
+    header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.5px; }
+    header p { font-size: 0.95rem; margin-top: 0.3rem; opacity: 0.9; }
+
+    main {
+      flex: 1;
+      max-width: 680px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .intro {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-left: 5px solid var(--teal);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .intro h2 { color: var(--teal); margin-bottom: 0.5rem; font-size: 1.15rem; }
+    .intro p { font-size: 0.95rem; line-height: 1.6; color: #555; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .card h3 span.q-num {
+      display: inline-block;
+      background: var(--teal);
+      color: white;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
+      text-align: center;
+      font-size: 0.85rem;
+      margin-right: 0.5rem;
+    }
+
+    /* Weight input */
+    .weight-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .weight-row input[type="number"] {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .weight-row input[type="number"]:focus { border-color: var(--teal); }
+
+    .unit-toggle {
+      display: flex;
+      border: 2px solid var(--teal);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .unit-toggle button {
+      padding: 0.6rem 1rem;
+      border: none;
+      background: white;
+      color: var(--teal);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .unit-toggle button.active {
+      background: var(--teal);
+      color: white;
+    }
+
+    /* Options */
+    .options { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .option:hover { border-color: var(--teal); background: #eaf6f8; }
+
+    .option input[type="radio"] {
+      accent-color: var(--teal);
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .option.selected { border-color: var(--teal); background: #eaf6f8; font-weight: 600; }
+
+    .option-sub {
+      display: block;
+      font-size: 0.8rem;
+      color: #888;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    #calc-btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      background: var(--red);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.5px;
+    }
+
+    #calc-btn:hover:not(:disabled) { background: var(--red-dark); transform: translateY(-1px); }
+    #calc-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* Results */
+    #results { display: none; }
+
+    .result-hero {
+      background: var(--teal);
+      color: white;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .result-hero p { opacity: 0.9; font-size: 0.95rem; margin-bottom: 0.5rem; }
+
+    .protein-amount {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .protein-range {
+      font-size: 1rem;
+      opacity: 0.85;
+      margin-top: 0.4rem;
+    }
+
+    .protein-unit { font-size: 1.2rem; font-weight: 400; }
+
+    .breakdown-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .breakdown-card h3 {
+      color: var(--teal);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .meal-box {
+      background: #eaf6f8;
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .meal-box .meal-label { font-size: 0.75rem; color: #888; }
+    .meal-box .meal-g { font-size: 1.4rem; font-weight: 700; color: var(--teal); }
+    .meal-box .meal-name { font-size: 0.8rem; color: #555; margin-top: 2px; }
+
+    .food-list { list-style: none; }
+
+    .food-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+    }
+
+    .food-list li:last-child { border-bottom: none; }
+    .food-list .food-g { font-weight: 700; color: var(--teal); }
+
+    .cta-box {
+      background: var(--teal);
+      color: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .cta-box h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+    .cta-box p { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; }
+
+    .cta-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+
+    .cta-buttons a {
+      display: inline-block;
+      padding: 0.6rem 1.3rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .cta-buttons a:hover { opacity: 0.85; }
+    .btn-white { background: white; color: var(--teal); }
+    .btn-red { background: var(--red); color: white; }
+
+    #retake-btn {
+      display: block;
+      width: 100%;
+      margin-top: 0.75rem;
+      background: none;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 0.6rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #666;
+      transition: border-color 0.2s;
+    }
+
+    #retake-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+    .disclaimer {
+      font-size: 0.78rem;
+      color: #aaa;
+      margin-top: 1.5rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.4rem; }
+      .protein-amount { font-size: 2.8rem; }
+      .meal-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>29 Again Custom Fitness</h1>
+  <p>Daily Protein Needs Calculator</p>
+</header>
+
+<main>
+  <div class="intro">
+    <h2>Why Protein Matters After 50</h2>
+    <p>After age 50, your body becomes less efficient at using dietary protein to build and maintain muscle. Eating enough protein — spread throughout the day — is one of the most powerful things you can do to fight muscle loss, support bone health, and stay strong and independent.</p>
+  </div>
+
+  <div id="form-section">
+
+    <div class="card">
+      <h3><span class="q-num">1</span> Your Body Weight</h3>
+      <div class="weight-row">
+        <input type="number" id="weight-input" placeholder="Enter weight" min="50" max="500" />
+        <div class="unit-toggle">
+          <button id="btn-lbs" class="active" onclick="setUnit('lbs')">lbs</button>
+          <button id="btn-kg" onclick="setUnit('kg')">kg</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="q-num">2</span> Activity Level</h3>
+      <div class="options" id="activity-options">
+        <label class="option">
+          <input type="radio" name="activity" value="sedentary">
+          <span>Sedentary<span class="option-sub">Little to no exercise, mostly sitting</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="activity" value="light">
+          <span>Lightly Active<span class="option-sub">Light exercise or walking 1–3 days/week</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="activity" value="moderate">
+          <span>Moderately Active<span class="option-sub">Exercise 3–5 days/week</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="activity" value="active">
+          <span>Very Active<span class="option-sub">Hard exercise 6–7 days/week</span></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="q-num">3</span> Your Primary Goal</h3>
+      <div class="options" id="goal-options">
+        <label class="option">
+          <input type="radio" name="goal" value="preserve">
+          <span>Preserve Muscle<span class="option-sub">Maintain what I have as I age</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="goal" value="build">
+          <span>Build Muscle &amp; Strength<span class="option-sub">Get stronger and add lean mass</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="goal" value="lose">
+          <span>Lose Weight<span class="option-sub">Reduce body fat while protecting muscle</span></span>
+        </label>
+      </div>
+    </div>
+
+    <button id="calc-btn" disabled onclick="calculate()">Calculate My Protein Needs</button>
+  </div>
+
+  <div id="results">
+    <div class="result-hero">
+      <p>Your daily protein target</p>
+      <div class="protein-amount" id="result-target">—</div>
+      <div class="protein-unit">grams per day</div>
+      <div class="protein-range" id="result-range"></div>
+    </div>
+
+    <div class="breakdown-card">
+      <h3>Spread it across your meals</h3>
+      <div class="meal-grid">
+        <div class="meal-box">
+          <div class="meal-label">Breakfast</div>
+          <div class="meal-g" id="meal-1">—</div>
+          <div class="meal-label">grams</div>
+        </div>
+        <div class="meal-box">
+          <div class="meal-label">Lunch</div>
+          <div class="meal-g" id="meal-2">—</div>
+          <div class="meal-label">grams</div>
+        </div>
+        <div class="meal-box">
+          <div class="meal-label">Dinner</div>
+          <div class="meal-g" id="meal-3">—</div>
+          <div class="meal-label">grams</div>
+        </div>
+      </div>
+      <p style="font-size:0.82rem;color:#888;">Spreading protein evenly across meals maximizes muscle protein synthesis — aim for at least 25–30g per meal.</p>
+    </div>
+
+    <div class="breakdown-card">
+      <h3>High-protein foods to hit your goal</h3>
+      <ul class="food-list">
+        <li><span>Chicken breast (3 oz cooked)</span><span class="food-g">26g</span></li>
+        <li><span>Greek yogurt, plain (1 cup)</span><span class="food-g">20g</span></li>
+        <li><span>Eggs (2 large)</span><span class="food-g">12g</span></li>
+        <li><span>Canned tuna (3 oz)</span><span class="food-g">22g</span></li>
+        <li><span>Cottage cheese (½ cup)</span><span class="food-g">14g</span></li>
+        <li><span>Salmon (3 oz cooked)</span><span class="food-g">22g</span></li>
+        <li><span>Whey protein shake (1 scoop)</span><span class="food-g">25g</span></li>
+        <li><span>Edamame (½ cup)</span><span class="food-g">9g</span></li>
+      </ul>
+    </div>
+
+    <div class="cta-box">
+      <h3>Want a personalized nutrition &amp; strength plan?</h3>
+      <p>Stephen Holt combines strength training and nutrition coaching specifically for women over 50. Start with a free 1-week trial.</p>
+      <div class="cta-buttons">
+        <a href="tel:+14104297029" class="btn-white">📞 (410) 429-7029</a>
+        <a href="mailto:info@29againfitness.com" class="btn-white">✉ Email Us</a>
+        <a href="https://29againfitness.com" target="_blank" class="btn-red">Try 1 Free Week →</a>
+      </div>
+    </div>
+
+    <button id="retake-btn" onclick="retake()">Recalculate</button>
+
+    <p class="disclaimer">This calculator provides general guidance based on established protein recommendations for adults over 50. Individual needs vary. Consult a registered dietitian or your physician for personalized medical nutrition advice.</p>
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 <a href="https://29againfitness.com">29 Again Custom Fitness</a> &mdash; Timonium, MD &mdash; (410) 429-7029
+</footer>
+
+<script>
+  let unit = 'lbs';
+
+  function setUnit(u) {
+    const input = document.getElementById('weight-input');
+    const val = parseFloat(input.value);
+    unit = u;
+    document.getElementById('btn-lbs').classList.toggle('active', u === 'lbs');
+    document.getElementById('btn-kg').classList.toggle('active', u === 'kg');
+    if (!isNaN(val)) {
+      input.value = u === 'kg' ? Math.round(val / 2.205) : Math.round(val * 2.205);
+    }
+    checkReady();
+  }
+
+  // Radio styling
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const name = r.name;
+      document.querySelectorAll(`input[name="${name}"]`).forEach(x => {
+        x.closest('.option').classList.remove('selected');
+      });
+      r.closest('.option').classList.add('selected');
+      checkReady();
+    });
+  });
+
+  document.getElementById('weight-input').addEventListener('input', checkReady);
+
+  function checkReady() {
+    const w = parseFloat(document.getElementById('weight-input').value);
+    const activity = document.querySelector('input[name="activity"]:checked');
+    const goal = document.querySelector('input[name="goal"]:checked');
+    document.getElementById('calc-btn').disabled = !(w > 0 && activity && goal);
+  }
+
+  function calculate() {
+    let weight = parseFloat(document.getElementById('weight-input').value);
+    const activity = document.querySelector('input[name="activity"]:checked').value;
+    const goal = document.querySelector('input[name="goal"]:checked').value;
+
+    // Convert to kg
+    const weightKg = unit === 'lbs' ? weight / 2.205 : weight;
+
+    // Protein multipliers (g/kg) based on activity + goal
+    // Evidence-based ranges for adults 50+
+    const table = {
+      sedentary: { preserve: [1.0, 1.2], build: [1.2, 1.6], lose: [1.2, 1.5] },
+      light:     { preserve: [1.1, 1.3], build: [1.4, 1.7], lose: [1.3, 1.6] },
+      moderate:  { preserve: [1.2, 1.5], build: [1.6, 2.0], lose: [1.5, 1.8] },
+      active:    { preserve: [1.4, 1.6], build: [1.8, 2.2], lose: [1.6, 2.0] },
+    };
+
+    const [low, high] = table[activity][goal];
+    const target = Math.round(weightKg * ((low + high) / 2));
+    const rangeLow = Math.round(weightKg * low);
+    const rangeHigh = Math.round(weightKg * high);
+    const perMeal = Math.round(target / 3);
+
+    document.getElementById('result-target').textContent = target;
+    document.getElementById('result-range').textContent = `Recommended range: ${rangeLow}–${rangeHigh}g/day`;
+    document.getElementById('meal-1').textContent = perMeal;
+    document.getElementById('meal-2').textContent = perMeal;
+    document.getElementById('meal-3').textContent = target - perMeal * 2 + perMeal; // handle rounding
+
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function retake() {
+    document.getElementById('form-section').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>

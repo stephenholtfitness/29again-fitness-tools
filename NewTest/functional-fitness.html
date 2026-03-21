@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Functional Fitness Assessment | 29 Again Custom Fitness</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --teal: #00859a; --red: #FF4140; --teal-dark: #006f80; --red-dark: #d93534; --light: #f4f8f9; --text: #2b2b2b; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--teal); color: white; text-align: center; padding: 1.5rem 1rem; }
+    header h1 { font-size: 1.8rem; font-weight: 700; }
+    header p { font-size: 0.95rem; margin-top: 0.3rem; opacity: 0.9; }
+    main { flex: 1; max-width: 680px; width: 100%; margin: 2rem auto; padding: 0 1rem; }
+    .intro { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 5px solid var(--teal); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .intro h2 { color: var(--teal); margin-bottom: 0.5rem; font-size: 1.15rem; }
+    .intro p { font-size: 0.95rem; line-height: 1.6; color: #555; }
+    .test-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .test-card.answered { border-left: 5px solid var(--teal); }
+    .test-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+    .test-icon { font-size: 2rem; flex-shrink: 0; }
+    .test-header h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .test-header .how-to { font-size: 0.82rem; color: #777; line-height: 1.5; }
+    .test-header .how-to strong { color: var(--teal); }
+    .options { display: flex; flex-direction: column; gap: 0.6rem; }
+    .option { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.7rem 1rem; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 0.9rem; }
+    .option:hover { border-color: var(--teal); background: #eaf6f8; }
+    .option input[type="radio"] { accent-color: var(--teal); width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+    .option.selected { border-color: var(--teal); background: #eaf6f8; font-weight: 600; }
+    #submit-btn { display: block; width: 100%; padding: 1rem; background: var(--red); color: white; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s, transform 0.1s; letter-spacing: 0.5px; }
+    #submit-btn:hover:not(:disabled) { background: var(--red-dark); transform: translateY(-1px); }
+    #submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+    #results { display: none; }
+    .score-hero { background: var(--teal); color: white; border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.2rem; }
+    .score-hero p { opacity: 0.9; font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .score-big { font-size: 3.5rem; font-weight: 800; line-height: 1; }
+    .score-sub { font-size: 1rem; opacity: 0.85; margin-top: 0.3rem; }
+    .area-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.2rem; }
+    .area-box { background: white; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.07); text-align: center; }
+    .area-box .area-label { font-size: 0.8rem; color: #888; margin-bottom: 0.4rem; }
+    .area-box .area-score { font-size: 1.5rem; font-weight: 800; }
+    .area-box .area-rating { font-size: 0.8rem; margin-top: 0.2rem; font-weight: 600; }
+    .great { color: #1a7f4f; }
+    .good { color: var(--teal); }
+    .fair { color: #e6a800; }
+    .poor { color: var(--red-dark); }
+    .recs-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .recs-card h3 { color: var(--teal); margin-bottom: 0.75rem; font-size: 1rem; }
+    .rec-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; line-height: 1.5; }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-icon { flex-shrink: 0; font-size: 1.1rem; }
+    .cta-box { background: var(--teal); color: white; border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+    .cta-box h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+    .cta-box p { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; }
+    .cta-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+    .cta-buttons a { display: inline-block; padding: 0.6rem 1.3rem; border-radius: 8px; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: opacity 0.2s; }
+    .cta-buttons a:hover { opacity: 0.85; }
+    .btn-white { background: white; color: var(--teal); }
+    .btn-red { background: var(--red); color: white; }
+    #retake-btn { display: block; width: 100%; margin-top: 0.75rem; background: none; border: 2px solid #ccc; border-radius: 8px; padding: 0.6rem; cursor: pointer; font-size: 0.9rem; color: #666; transition: border-color 0.2s; }
+    #retake-btn:hover { border-color: var(--teal); color: var(--teal); }
+    .disclaimer { font-size: 0.78rem; color: #aaa; margin-top: 1.5rem; line-height: 1.5; text-align: center; }
+    footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #888; }
+    footer a { color: var(--teal); text-decoration: none; }
+    @media (max-width: 480px) { .area-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>29 Again Custom Fitness</h1>
+  <p>Functional Fitness Self-Assessment</p>
+</header>
+<main>
+  <div class="intro">
+    <h2>How Functional Are You?</h2>
+    <p>Functional fitness is your ability to move safely and confidently in everyday life — getting up from a chair, carrying groceries, climbing stairs, catching yourself from a fall. This self-assessment evaluates your strength, balance, mobility, and endurance without any equipment. Be honest for the most accurate result.</p>
+  </div>
+
+  <div id="form-section">
+
+    <!-- STRENGTH -->
+    <div class="test-card" id="card-0">
+      <div class="test-header">
+        <div class="test-icon">💪</div>
+        <div>
+          <h3>Lower Body Strength — Chair Stand Test</h3>
+          <div class="how-to"><strong>How to do it:</strong> Sit in a chair with arms crossed on your chest. Stand fully upright and sit back down. Count how many times you can do this in <strong>30 seconds</strong>.</div>
+        </div>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="strength" value="4"> 14 or more stands</label>
+        <label class="option"><input type="radio" name="strength" value="3"> 11–13 stands</label>
+        <label class="option"><input type="radio" name="strength" value="2"> 8–10 stands</label>
+        <label class="option"><input type="radio" name="strength" value="1"> Fewer than 8 stands or needed to use hands</label>
+      </div>
+    </div>
+
+    <!-- BALANCE -->
+    <div class="test-card" id="card-1">
+      <div class="test-header">
+        <div class="test-icon">🦶</div>
+        <div>
+          <h3>Balance — Single-Leg Stand</h3>
+          <div class="how-to"><strong>How to do it:</strong> Stand near a wall for safety. Lift one foot a few inches off the ground and balance on the other leg. Time how long you can hold it with eyes open.</div>
+        </div>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="balance" value="4"> 30 seconds or more</label>
+        <label class="option"><input type="radio" name="balance" value="3"> 15–29 seconds</label>
+        <label class="option"><input type="radio" name="balance" value="2"> 5–14 seconds</label>
+        <label class="option"><input type="radio" name="balance" value="1"> Less than 5 seconds or unable</label>
+      </div>
+    </div>
+
+    <!-- MOBILITY -->
+    <div class="test-card" id="card-2">
+      <div class="test-header">
+        <div class="test-icon">🚶</div>
+        <div>
+          <h3>Mobility &amp; Agility — Timed Up &amp; Go</h3>
+          <div class="how-to"><strong>How to do it:</strong> Sit in a chair. On "go," stand up, walk 10 feet, turn around, walk back, and sit down. Time yourself in seconds.</div>
+        </div>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="mobility" value="4"> Under 10 seconds</label>
+        <label class="option"><input type="radio" name="mobility" value="3"> 10–13 seconds</label>
+        <label class="option"><input type="radio" name="mobility" value="2"> 14–20 seconds</label>
+        <label class="option"><input type="radio" name="mobility" value="1"> Over 20 seconds or unable</label>
+      </div>
+    </div>
+
+    <!-- UPPER BODY -->
+    <div class="test-card" id="card-3">
+      <div class="test-header">
+        <div class="test-icon">🏋️</div>
+        <div>
+          <h3>Upper Body Strength — Arm Curl Test</h3>
+          <div class="how-to"><strong>How to do it:</strong> Hold a weight (5 lb for women, 8 lb for men — or estimate with a bag). Do as many bicep curls as you can in <strong>30 seconds</strong> with full range of motion.</div>
+        </div>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="upper" value="4"> 18 or more curls</label>
+        <label class="option"><input type="radio" name="upper" value="3"> 14–17 curls</label>
+        <label class="option"><input type="radio" name="upper" value="2"> 10–13 curls</label>
+        <label class="option"><input type="radio" name="upper" value="1"> Fewer than 10 curls</label>
+      </div>
+    </div>
+
+    <!-- FLEXIBILITY -->
+    <div class="test-card" id="card-4">
+      <div class="test-header">
+        <div class="test-icon">🧘</div>
+        <div>
+          <h3>Flexibility — Sit &amp; Reach</h3>
+          <div class="how-to"><strong>How to do it:</strong> Sit on the edge of a chair, extend one leg straight, and reach both hands toward your toes. How far can you reach?</div>
+        </div>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="flex" value="4"> Past my toes (fingers beyond toes)</label>
+        <label class="option"><input type="radio" name="flex" value="3"> Fingers reach my toes</label>
+        <label class="option"><input type="radio" name="flex" value="2"> Within 4 inches of my toes</label>
+        <label class="option"><input type="radio" name="flex" value="1"> More than 4 inches from my toes</label>
+      </div>
+    </div>
+
+    <!-- ENDURANCE -->
+    <div class="test-card" id="card-5">
+      <div class="test-header">
+        <div class="test-icon">❤️</div>
+        <div>
+          <h3>Endurance — 2-Minute Step Test</h3>
+          <div class="how-to"><strong>How to do it:</strong> March in place for 2 minutes, raising your knees to mid-thigh height. Count how many times your right knee reaches that height.</div>
+        </div>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="endurance" value="4"> 90 or more steps</label>
+        <label class="option"><input type="radio" name="endurance" value="3"> 70–89 steps</label>
+        <label class="option"><input type="radio" name="endurance" value="2"> 50–69 steps</label>
+        <label class="option"><input type="radio" name="endurance" value="1"> Fewer than 50 steps</label>
+      </div>
+    </div>
+
+    <button type="button" id="submit-btn" disabled onclick="calculate()">See My Results</button>
+  </div>
+
+  <div id="results">
+    <div class="score-hero">
+      <p>Your Functional Fitness Score</p>
+      <div class="score-big" id="score-val">—</div>
+      <div class="score-sub" id="score-label">out of 24</div>
+    </div>
+
+    <div class="area-grid">
+      <div class="area-box">
+        <div class="area-label">Lower Body Strength</div>
+        <div class="area-score" id="a-strength">—</div>
+        <div class="area-rating" id="r-strength"></div>
+      </div>
+      <div class="area-box">
+        <div class="area-label">Balance</div>
+        <div class="area-score" id="a-balance">—</div>
+        <div class="area-rating" id="r-balance"></div>
+      </div>
+      <div class="area-box">
+        <div class="area-label">Mobility &amp; Agility</div>
+        <div class="area-score" id="a-mobility">—</div>
+        <div class="area-rating" id="r-mobility"></div>
+      </div>
+      <div class="area-box">
+        <div class="area-label">Upper Body Strength</div>
+        <div class="area-score" id="a-upper">—</div>
+        <div class="area-rating" id="r-upper"></div>
+      </div>
+      <div class="area-box">
+        <div class="area-label">Flexibility</div>
+        <div class="area-score" id="a-flex">—</div>
+        <div class="area-rating" id="r-flex"></div>
+      </div>
+      <div class="area-box">
+        <div class="area-label">Endurance</div>
+        <div class="area-score" id="a-endurance">—</div>
+        <div class="area-rating" id="r-endurance"></div>
+      </div>
+    </div>
+
+    <div class="recs-card">
+      <h3>Your Priority Areas</h3>
+      <div id="rec-list"></div>
+    </div>
+
+    <div class="cta-box">
+      <h3>Ready to improve your functional fitness?</h3>
+      <p>Stephen Holt builds personalized programs targeting exactly these areas for women over 50. Start with a free 1-week trial.</p>
+      <div class="cta-buttons">
+        <a href="tel:+14104297029" class="btn-white">📞 (410) 429-7029</a>
+        <a href="mailto:info@29againfitness.com" class="btn-white">✉ Email Us</a>
+        <a href="https://29againfitness.com" target="_blank" class="btn-red">Try 1 Free Week →</a>
+      </div>
+    </div>
+
+    <button id="retake-btn" onclick="retake()">Retake the Assessment</button>
+    <p class="disclaimer">This self-assessment is for informational purposes and is not a substitute for professional medical evaluation. If you experience pain or difficulty with any test, stop and consult your physician.</p>
+  </div>
+</main>
+<footer>&copy; 2026 <a href="https://29againfitness.com">29 Again Custom Fitness</a> &mdash; Timonium, MD &mdash; (410) 429-7029</footer>
+
+<script>
+  const areas = [
+    { name: 'strength', label: 'Lower Body Strength', icon: '💪', tips: { 1: 'Focus on chair squats, step-ups, and leg press to build lower body power.', 2: 'Add resistance to squats and lunges to progress your leg strength.', 3: 'Great lower body strength — add single-leg work to continue progressing.', 4: 'Excellent! Maintain with weighted squats and deadlifts.' } },
+    { name: 'balance', label: 'Balance', icon: '🦶', tips: { 1: 'Practice standing near a wall daily. Work on ankle stability and hip strength — critical for fall prevention.', 2: 'Add heel-to-toe walking and single-leg exercises to your routine.', 3: 'Good balance — try eyes-closed balance drills and unstable surfaces.', 4: 'Excellent balance! Try single-leg deadlifts and balance board work.' } },
+    { name: 'mobility', label: 'Mobility & Agility', icon: '🚶', tips: { 1: 'Work on hip flexor stretches, thoracic mobility, and slow directional change drills.', 2: 'Add agility ladder drills and lateral movement exercises.', 3: 'Good agility — cone drills and reaction training will sharpen it further.', 4: 'Excellent movement! Keep it up with dynamic warm-ups and agility work.' } },
+    { name: 'upper', label: 'Upper Body Strength', icon: '🏋️', tips: { 1: 'Start with resistance band rows and wall push-ups to build shoulder and arm strength.', 2: 'Progress to dumbbell rows, chest press, and overhead press.', 3: 'Good upper body strength — add pulling movements like lat pulldowns.', 4: 'Excellent! Challenge yourself with heavier loads and compound lifts.' } },
+    { name: 'flex', label: 'Flexibility', icon: '🧘', tips: { 1: 'Stretch daily — focus on hamstrings, hip flexors, and thoracic spine. Try yoga or gentle stretching routines.', 2: 'Add 10 minutes of stretching after every workout to improve range of motion.', 3: 'Good flexibility — add dynamic stretching and foam rolling.', 4: 'Excellent range of motion! Maintain with regular yoga or mobility work.' } },
+    { name: 'endurance', label: 'Endurance', icon: '❤️', tips: { 1: 'Start with 10–15 minute daily walks and build gradually. Low-impact cardio like swimming or cycling works great.', 2: 'Aim for 150 minutes of moderate activity per week — brisk walking, cycling, or dancing.', 3: 'Good endurance — add interval training to boost your cardiovascular capacity.', 4: 'Excellent endurance! Keep up the cardio and add some HIIT for variety.' } },
+  ];
+
+  const ratings = ['', 'Needs Work', 'Fair', 'Good', 'Excellent'];
+  const ratingClasses = ['', 'poor', 'fair', 'good', 'great'];
+
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll(`input[name="${r.name}"]`).forEach(x => x.closest('.option').classList.remove('selected'));
+      r.closest('.option').classList.add('selected');
+      const idx = areas.findIndex(a => a.name === r.name);
+      if (idx >= 0) document.getElementById('card-' + idx).classList.add('answered');
+      const answered = areas.filter(a => document.querySelector(`input[name="${a.name}"]:checked`));
+      document.getElementById('submit-btn').disabled = answered.length < areas.length;
+    });
+  });
+
+  function calculate() {
+    let total = 0;
+    const recList = document.getElementById('rec-list');
+    recList.innerHTML = '';
+
+    areas.forEach(a => {
+      const val = parseInt(document.querySelector(`input[name="${a.name}"]:checked`).value);
+      total += val;
+      document.getElementById('a-' + a.name).textContent = val + '/4';
+      const rEl = document.getElementById('r-' + a.name);
+      rEl.textContent = ratings[val];
+      rEl.className = 'area-rating ' + ratingClasses[val];
+
+      if (val <= 2) {
+        recList.innerHTML += `<div class="rec-item"><span class="rec-icon">${a.icon}</span><span><strong>${a.label}:</strong> ${a.tips[val]}</span></div>`;
+      }
+    });
+
+    if (recList.innerHTML === '') {
+      recList.innerHTML = '<div class="rec-item"><span class="rec-icon">🌟</span><span><strong>Outstanding!</strong> You scored well across all areas. Keep up the great work and focus on maintaining and progressing what you\'ve built.</span></div>';
+    }
+
+    document.getElementById('score-val').textContent = total;
+    const overall = total >= 20 ? 'Excellent Functional Fitness' : total >= 15 ? 'Good Functional Fitness' : total >= 10 ? 'Fair — Room to Grow' : 'Needs Attention — Start Here';
+    document.getElementById('score-label').textContent = overall + ' (' + total + '/24)';
+
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function retake() {
+    document.querySelectorAll('input[type="radio"]').forEach(r => { r.checked = false; r.closest('.option').classList.remove('selected'); });
+    document.querySelectorAll('.test-card').forEach(c => c.classList.remove('answered'));
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('form-section').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
